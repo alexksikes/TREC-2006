@@ -1,0 +1,57 @@
+Author: Alex Ksikes
+email: ale@sims.berkeley.edu
+
+Directory structure:
+====================
+
+/projects/bebop/trec/trec2006/
+
+==== data/ ====
+
+The zip files is the actual data from trec
+/ flat --- The same data all in the same folder
+
+==== data.norm.new/ ====
+
+Trec data nornmalized.
+
+Each span is separated by @#@#@ - span_id - @#@#@
+
+spans_id.txt --- Keeps track of each span location
+
+spans_noid.txt --- Used to check if the generated spans match the trec spans
+(legalspans.txt should be identical to this file)
+
+==== annotations/ ====
+
+Holds annotations of the corpus
+
+An annotation file has the tab delimited input format:
+
+pmid span_id annotation_id annotation_text
+
+annotation_id is the annotation that will be indexed
+annotation_text is the actual text that has been recognized 
+has an annotation.
+
+==== parsed/ ====
+
+XML/ --- Holds Martinj parsing of the data
+
+sections/sections.clustered --- All sections have extracted and sorted 
+in order of occurences with count on the left.
+
+categories --- Sections have been assigned to categories.
+
+section_spans --- Offset and length of each section extracted 
+from the XML.
+
+==== pos/ ====
+
+Holds part of speech tagging from Brown.
+
+==== lucene/ ====
+
+index --- Holds full text index.
+index.sections.genes --- Holds full text index + section annotations 
++ gene annotations.

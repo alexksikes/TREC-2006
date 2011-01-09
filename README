@@ -1,0 +1,202 @@
+Here is my research code for TREC Genomics 2006. 
+It includes the steps needed for data preparation, citation analysis, parsing, annotating, indexing, and search.
+The data (about 162,259 articles from the 49 journals) can be downloaded here: http://ir.ohsu.edu/genomics/2006data.html
+
+Below is the README file which was included at the time.
+
+07/15/2006
+
+Author: Alex Ksikes
+email: ale@sims.berkeley.edu
+
+==== (0) Programs installed ==== 
+
+/projects/bebop/usr/local/gcc-3.4.4 --- Used to compile PyLucene
+/projects/bebop/usr/local/lib/python2.4 --- python version for PyLucene
+
+==== (1) Data normalization ====
+
+- normalize.py
+Description: normalize the trec data
+Usage: python normalize.py out_folder trec_zipfiles
+
+- compute_spans.py
+Description: compute the spans of a given html_file
+Usage: python compute_spans.py html_file
+
+- strip_html.py
+Description: remove all html tags
+Usage: python strip_html.py html_file
+
+==== (2) Citation/link analysis ====
+
+- citations.py
+Desription: Grab pub med links from the trec data
+Usage: python trec_index.py trec_zipfiles output_file 
+writes a citation_file
+
+- citation_to_dot.py
+Desription: Writes a dot file to be read by graphwiz
+Usage: python citation_to_dot.py citation_file dot_file
+
+==== (3) Parsing - Html tag analysis ====
+
+- stats.py 
+Description: 
+# From internal links of the form <a href="#tags">anchored_text</a>
+# We get the following stats:
+# tags (exist_in_article_count, total_count)
+# anchored_text (exist_in_article_count, total_count)
+# coo_tags_anchored_text (tags, anchored_text, count)
+# article_size (article, number_of_char)
+# tags_article (tags, article)
+# anchored_text article (anchored_text, article)
+# jrl_art_count (journal_name, number_articles)
+Usage: python stats.py output_name trec_zipfiles
+
+Older versions:
+- internal_links.py
+- internal_links2.py
+
+==== (4) Parsing - Using Martinj's XML ====
+
+== Error checking - Fixing ==
+
+- fix_xml.py
+Description: Fix Martin's xml by stripping out all unrecognized entities. 
+
+- error_check.py, 
+- error_check2.py
+- error_check3.py
+Description: xml validity, abnormal ids and ratio of text from xml 
+over text from html < 0.5
+
+== Section extraction - categorizing ==
+
+- grab_sections.py
+Description: Grab all section ids
+Usage: python grab_sections.py xml_data
+
+- quick_categorize.py
+Description: Categorize each clustered section
+Usage: python quick_categorize.py sections_clustered
+
+==== (5) Section annotation ====
+
+- section_spans.py
+Description: Get the spans of each section
+Usage: python section_spans.py xml_path
+Output section spans.
+
+- map_sections.py
+Description: Map section_spans to span_ids
+Usage: python map_sections.py span_ids section_spans
+
+==== (6) Medline abstracts ====
+
+A lot of abstracts from the xml data were misclassified. Medline was
+used to get them right.
+
+Run these under nepal:
+
+- medline_annotations.py
+Description: Annotate the span ids as abstract using medline
+Usage: python medline_annotations.py normalized_data
+
+- locate.py
+Description: Finds span_id of a given medline abstract
+Usage: python locate.py abstract normalized_article
+
+- text_similarity.py 
+quick and dirty term vector implementation used to locate 
+medline abstract in our normalized data
+
+==== (7) Search engine - Indexing ====
+
+- index_spans.py
+Description: 
+# Index the normalized data with the annotation_files
+# An annotation file has the following tab delimited format:
+# 
+# pmid span_id annotation_id annotation_text
+#
+# annotation_id is what will be indexed (for now)
+# annotation_text is the actual annotated text
+#
+# The field names are hard coded and should be given in order
+Usage: python index_spans.py data_norm index_dir annotation_files
+
+- r.py
+Description: Allows searching in any index and output a table.
+Usage: python r.py -i lucene_index -f field_mame_1,field_name_2,...,field_name_ -q 'the_query' -s start_page -r nb_of_results
+
+You have to use /projects/bebop/usr/local/bin/python
+
+To allow a programmatic interface in any language I chose the following
+architecture:
+
+|---------------| url (REST queries)  |--------| searcher  |------- |
+| Web interface |-------------------->| Small  |---------->| Lucene |
+|               |                     | web    |           |        |
+| Other clients |<--------------------| server |<----------| index  |
+|---------------|   formatted output  |--------|    hits   |------- |
+
+- lucene_server2.py
+Description: Launch the web server that takes REST calls and searches
+the lucene index given by index_dir
+Usage: python lucene_server.py index_dir
+
+- test_server.py
+Description: A small command line client to the server.
+
+==== (8) Programmable interface ====
+
+The search engine supports a REST API. 
+Read the output data at the following url:
+http://localhost:port/%s?query=%s&start=%s&results=%s
+
+port = port number of the server
+query = urlencoded query
+start = start page
+results = number of results per page
+
+The output data:
+
+I wanted the server to output xml but no DOM extension for php was installed.
+The web interface needed this extension so I did this quick and dirty output 
+format instead.
+
+"##@##hit_0...##@##hit_n"
+
+where hit_i is:
+"##@##field0::@::field1::@::field2::@::field3::@::field4"
+
+==== (9) Web interface ====
+
+http://bebop.berkeley.edu/trec/index.php?q=hello&s=10&r=10
+q is the query
+s is the start page
+r is the number of results
+
+bebop/public_html/trec/index.php --- Main php script
+bebop/public_html/trec/tools.php --- Some useful functions   
+
+==== (10) Search engine - own implentation ====
+
+I started by writing a small search engine that would fit the
+entire index in memory.
+
+The files are:
+altsets.py, tagger.py, test_server.py, index_trec.py, mini_search.py, 
+tools.py
+
+==== (11) Passage scoring  ====
+
+get_span_text2.py
+Description: quickly get a span from the collection given by its span_id
+
+overlap.py 
+score_all_passages.py 
+score_passage.py 
+span_ids_to_pmids.py
+

@@ -1,0 +1,50 @@
+Fields are:
+-----------
+pmid 
+span_id
+section
+gene
+mesh_id
+mesh_tree
+
+All fields are searchable.
+
+section:category 
+----------------
+where category has values:
+
+title
+references
+abstract
+abbreviations
+conclusions
+results,
+introduction
+methods
+footnotes
+acknowledgments
+appendix
+future
+cases
+grants
+main    (main text)
+nc  (not categorized)
+
+gene:name
+---------
+where name is the gene name from the Trec questions with no space
+starting with a 'ss', 'sw', 'ws' or 'ww'.
+
+First prefix letter: strong (s) or Weak (w) in the QUERY.
+Second prefix letter: strong (s) or Weak (w) in the DOCUMENT.
+
+Example query:
+--------------
+pmid:14610078 gene:ssp53 "Western analyses using antibodies"
+
+Search the article with pmid 14610078 for genes p53 and containing the phrase 
+"Western analyses using antibodies".
+
+All Lucene operators:
+---------------------
+http://lucene.apache.org/java/docs/queryparsersyntax.html

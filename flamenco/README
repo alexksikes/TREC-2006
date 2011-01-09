@@ -1,0 +1,13 @@
+1) run make_trec_instance.py instance_folder
+
+2) then run fix_instance.py instance_folder
+
+3) rename .fixed files
+
+4) run flamenco start instance_folder
+
+If you wish to make an instance for any given set of pmids replace step 1) by:
+
+1) run make_instance_from_pmids.py pmid_file instance_folder
+
+where pmid_file has one line per pmid. 
